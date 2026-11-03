@@ -1,0 +1,10 @@
+/* Connected rare/normal skill blocks instead of unrelated rows and wrapping pills. */
+function skillPillsHTML31(values){return E.skillDisplayGroups(values).map(g=>`<div class="skill-pill-family31 ${g.lower.length?'has-lower31':''}"><div>${skillButton(g.id)}</div>${g.lower.map(id=>`<div class="skill-pill-lower31"><small>하위 일반</small>${skillButton(id)}</div>`).join('')}</div>`).join('')}
+function skillRowsHTML31(values,row,u,known){const present=new Set(values);return E.skillDisplayGroups(values).map(g=>`<section class="skill-family31 ${g.lower.length?'has-lower31':''}">${row(g.id,known)}${g.lower.map(id=>`<div class="skill-linked31"><small class="skill-link-label31">하위 일반 스킬</small>${present.has(id)?row(id,known):`<div class="skill-row skill-lower-reference31">${skillButton(id)}<span class="skill-state">${u.learned.includes(id)?'습득 완료':u.learned.some(k=>E.ancestors(k).has(id))?'상위 스킬로 강화 완료':'연결된 하위 스킬 · 해당 해금 목록에서 습득'}</span></div>`}</div>`).join('')}</section>`).join('')}
+const dexResults30=dexResultsHTML;
+dexResultsHTML=function(){
+ if(dexTab!=='skills')return dexResults30();
+ const rows=E.dexSearch('skills',search,dexFilters),groups=E.skillDisplayGroups(rows.map(s=>s.id)),shown=groups.slice(0,dexLimit),hits=new Set(rows.map(s=>s.id)),count=new Set(shown.flatMap(g=>[g.id,...g.lower]).filter(id=>hits.has(id))).size;
+ const card=(id,lower=false)=>{const s=E.skills.get(id);return `<div class="dex-skill-item31 ${lower?'dex-skill-lower31':''}">${lower?'<small class="skill-link-label31">하위 일반 스킬</small>':''}${skillButton(id)}<p>${esc(s.desc)}</p><small>${s.cost??'—'} Pt · ${s.rarity===6?'진화':s.rarity===2?'레어':s.rarity>=3?'고유':'일반'}</small></div>`};
+ return `<p class="note">${rows.length}종 검색됨 · ${count}종 표시 · 레어 스킬 아래에 연결된 하위 일반을 함께 표시합니다.</p><div class="dex-skill-grid skill-family-grid31">${shown.map(g=>`<article class="${g.lower.length?'has-lower31':''}">${card(g.id)}${g.lower.map(id=>card(id,true)).join('')}</article>`).join('')}</div>${groups.length>shown.length?button('더 보기 · '+(groups.length-shown.length)+'개 묶음 남음','dexMore','','full'):''}${rows.length?'':empty('검색어 또는 분류 조건을 바꿔 보세요.')}`;
+};
