@@ -5,6 +5,6 @@ const dexResults30=dexResultsHTML;
 dexResultsHTML=function(){
  if(dexTab!=='skills')return dexResults30();
  const rows=E.dexSearch('skills',search,dexFilters),groups=E.skillDisplayGroups(rows.map(s=>s.id)),shown=groups.slice(0,dexLimit),hits=new Set(rows.map(s=>s.id)),count=new Set(shown.flatMap(g=>[g.id,...g.lower]).filter(id=>hits.has(id))).size;
- const card=(id,lower=false)=>{const s=E.skills.get(id);return `<div class="dex-skill-item31 ${lower?'dex-skill-lower31':''}">${lower?'<small class="skill-link-label31">하위 일반 스킬</small>':''}${skillButton(id)}<p>${esc(s.desc)}</p><small>${s.cost??'—'} Pt · ${s.rarity===6?'진화':s.rarity===2?'레어':s.rarity>=3?'고유':'일반'}</small></div>`};
+ const card=(id,lower=false)=>{const s=E.skills.get(id);return `<div class="dex-skill-item31 ${lower?'dex-skill-lower31':''}">${lower?'<small class="skill-link-label31">하위 일반 스킬</small>':''}${skillButton(id)}<p>${esc(s.desc)}</p><small>${s.cost??'—'} Pt · ${s.inheritedSkill?'계승기':s.rarity===6?'진화기':s.rarity===2?'레어':s.rarity>=3?'고유기':'노말'}</small></div>`};
  return `<p class="note">${rows.length}종 검색됨 · ${count}종 표시 · 레어 스킬 아래에 연결된 하위 일반을 함께 표시합니다.</p><div class="dex-skill-grid skill-family-grid31">${shown.map(g=>`<article class="${g.lower.length?'has-lower31':''}">${card(g.id)}${g.lower.map(id=>card(id,true)).join('')}</article>`).join('')}</div>${groups.length>shown.length?button('더 보기 · '+(groups.length-shown.length)+'개 묶음 남음','dexMore','','full'):''}${rows.length?'':empty('검색어 또는 분류 조건을 바꿔 보세요.')}`;
 };

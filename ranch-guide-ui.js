@@ -1,5 +1,5 @@
 function fanNoticeHTML(){
- return `<section class="fan-notice"><h2>TRACEN FM · 비공식 팬게임</h2><p>TRACEN FM은 《우마무스메 프리티 더비》를 바탕으로 팬이 제작한 무료 비영리 게임입니다. Cygames, Inc. 및 원작 관계사와 제휴하지 않은 독립 팬 프로젝트입니다.</p><p>원작의 명칭, 캐릭터, 일러스트 및 관련 상표와 저작권은 Cygames, Inc.와 각 권리자에게 귀속됩니다.</p><a href="https://umamusume.jp/derivativework_guidelines/" target="_blank" rel="noopener noreferrer">우마무스메 공식 2차 창작 가이드라인 ↗</a></section>`;
+ return `<section class="fan-notice"><h2>TRACEN FM · 2차창작 팬게임</h2><p>TRACEN FM은 《우마무스메 프리티 더비》를 바탕으로 팬이 제작한 무료·비영리 2차 창작 게임입니다. Cygames, Inc. 및 원작 관계사와 제휴하지 않은 독립 팬 프로젝트이며, 공식 게임이 아닙니다.</p><p>원작과 팬 문화를 존중하며, 다음 원칙에 따라 제작·운영합니다.</p><ol><li>원작 《우마무스메 프리티 더비》와 제삼자의 사상·명예 등을 훼손할 목적을 담지 않습니다.</li><li>폭력적·기괴하거나 흉측한 표현 및 성적 묘사를 포함하지 않습니다.</li><li>특정 정치·종교·신념을 과도하게 옹호하거나 폄하하지 않습니다.</li><li>반사회적인 표현을 담지 않습니다.</li><li>제삼자의 권리를 존중하며, 권리를 침해하는 콘텐츠를 제작하거나 게시하지 않는 것을 원칙으로 합니다.</li><li>상업적 이용이나 영리를 목적으로 하지 않으며, 비영리 팬 활동(동인 활동)의 범위에서 제작·운영합니다.</li></ol><p>원작의 명칭, 캐릭터, 일러스트 및 관련 상표와 저작권은 Cygames, Inc.와 각 권리자에게 귀속됩니다.</p><a href="https://umamusume.jp/derivativework_guidelines/" target="_blank" rel="noopener noreferrer">우마무스메 공식 2차 창작 가이드라인 ↗</a></section>`;
 }
 /* A short handbook shared by new careers and the in-game help button. */
 let ranchSetupReady=false;
@@ -35,36 +35,36 @@ function newsTitleGrade(n){
  return n.kind==='awards'&&/최우수/.test(n.title)?'SR':null;
 }
 newsItem=function(n){
- const grade=newsTitleGrade(n),category=grade?'타이틀':n.kind==='awards'?'JRA 시상식':n.kind==='race'||n.kind==='upset'?'레이스':'목장 소식';
+ const grade=newsTitleGrade(n),category=grade?'타이틀':n.kind==='awards'?'JRA 시상식':n.kind==='race'||n.kind==='upset'?'레이스':'학원 소식';
  return classicNewsItem(n).replace('<h3>',`<span class="news-category">${titleRankBadge(grade)} ${category}</span><h3>`);
 };
 let ranchNewsTab='all';
 pages.news=()=>{
  const news=S.news.filter(n=>ranchNewsTab==='all'||ranchNewsTab==='title'&&newsTitleGrade(n)||ranchNewsTab==='own'&&(n.playerRelated||n.team===0));
- return `<div class="tabs page-tabs">${[['all','전체 소식'],['own','우리 목장'],['title','타이틀']].map(([key,label])=>button(label,'ranchNewsTab',`data-key="${key}"`,key===ranchNewsTab?'active':'')).join('')}</div>${panel('최신 소식',`<div class="news-feed">${news.slice(0,100).map(newsItem).join('')||empty('아직 도착한 소식이 없습니다.')}</div>`)}`;
+ return `<div class="tabs page-tabs">${[['all','전체 소식'],['own','우리 학원'],['title','타이틀']].map(([key,label])=>button(label,'ranchNewsTab',`data-key="${key}"`,key===ranchNewsTab?'active':'')).join('')}</div>${panel('최신 소식',`<div class="news-feed">${news.slice(0,100).map(newsItem).join('')||empty('아직 도착한 소식이 없습니다.')}</div>`)}`;
 };
 const guideHome=pages.home;
 pages.home=()=>guideHome();
 function welcome(){
- const action=ranchSetupReady?`<label>목장 이름 <span class="club-name-field"><input id="clubName" maxlength="16" value="트레센" aria-label="목장 이름"><b>목장</b></span></label><p class="club-name-help">이름만 입력하면 뒤에 ‘목장’이 붙습니다.</p>${button('목장 만들기 →','new','','primary')}`:
- `<div class="welcome-first-turn"><span>01 가이드</span><span>02 목장 이름</span><span>03 첫 영입</span></div>${button('새 커리어 시작 →','ranchSetup','','primary')}`;
- return `<main class="welcome ranch-welcome"><div class="welcome-copy"><div class="brand"><span class="brand-mark">T✦</span><div>TRACEN <b>FM</b><small>UMA MUSUME RANCH MANAGER</small></div></div><span class="eyebrow">트레센 목장 매니저</span><h1>첫 출전은<br>이 목장에서.</h1><p>주자를 영입하고, 훈련을 설계하고, 첫 레이스에 도전하세요. 은퇴한 주자의 인자는 다음 세대의 출발점이 됩니다.</p>${action}<div class="welcome-secondary">${button('저장 파일 불러오기','import','','small')}</div><a class="welcome-guide-link" href="#welcome-handbook"><span><strong>운영 가이드</strong><small>육성부터 목장 운영까지 한눈에</small></span><b aria-hidden="true">↓</b></a><small class="welcome-note">우마무스메 비공식 팬게임 · 브라우저 자동 저장</small></div><div class="welcome-art welcome-stadium"><img src="images/welcome-stadium.webp" alt="푸른 하늘 아래 관중석을 바라보는 우마무스메" fetchpriority="high"></div></main>${handbookHTML(true)}<footer class="fan-notice-footer">${fanNoticeHTML()}</footer>`;
+ const action=ranchSetupReady?`<label>학원 이름 <span class="club-name-field"><input id="clubName" maxlength="16" value="트레센" aria-label="학원 이름"><b>학원</b></span></label><p class="club-name-help">이름만 입력하면 뒤에 ‘학원’이 붙습니다.</p>${button('학원 설립하기 →','new','','primary')}`:
+ `<div class="welcome-first-turn"><span>01 가이드</span><span>02 학원 이름</span><span>03 첫 영입</span></div>${button('새 커리어 시작 →','ranchSetup','','primary')}`;
+ return `<main class="welcome ranch-welcome"><div class="welcome-copy"><div class="brand"><span class="brand-mark">T✦</span><div>TRACEN <b>FM</b><small>UMA MUSUME ACADEMY MANAGER</small></div></div><span class="eyebrow">트레센 학원 매니저</span><h1>우마무스메 학원을<br>운영하세요.</h1><p>주자를 영입하고, 훈련을 설계하고, 첫 레이스에 도전하세요. 은퇴한 주자의 인자는 다음 세대의 출발점이 됩니다.</p>${action}<div class="welcome-secondary">${button('저장 파일 불러오기','import','','small')}</div><a class="welcome-guide-link" href="#welcome-handbook"><span><strong>운영 가이드</strong><small>육성부터 학원 운영까지 한눈에</small></span><b aria-hidden="true">↓</b></a><small class="welcome-note">우마무스메 비공식 팬게임 · 브라우저 자동 저장</small></div><div class="welcome-art welcome-stadium"><img src="images/welcome-stadium.webp" alt="푸른 하늘과 관중석 앞에서 응원하는 우마무스메" fetchpriority="high"></div></main>${handbookHTML(true)}<footer class="fan-notice-footer">${fanNoticeHTML()}</footer>`;
 }
 const managementGuide=[
  {tag:'1. 영입',title:'우마무스메는 어디서 영입하나요?',comparison:{title:'개체값 총합별 별 등급',headers:['개체값 총합','별 등급'],rows:[['138~150','★★★★★'],['126~137','★★★★'],['115~125','★★★'],['103~114','★★'],['90~102','★']]},text:[
   '스카우트의 우마무스메 후보에서 의상, 적성, 개체값을 확인하고 계약하세요. 성급은 다섯 능력치의 개체값을 합산한 등급입니다. 목표 레이스의 적성과 스킬도 함께 확인하세요.',
-  '영입 직후에는 미데뷔 상태입니다. 1월 전반에 학원에서 주니어로 등록하고, 6월 전반 신마전에 도전하세요. 목장 정원은 10명이고 현역은 최대 4명입니다.'
+  '영입 직후에는 미데뷔 상태입니다. 1월 전반에 데뷔반에서 주니어로 등록하고, 6월 전반 신마전에 도전하세요. 학원 정원은 10명이고 현역은 최대 4명입니다.'
  ]},
  {tag:'2. 서포트',title:'서포트 카드는 어디서 구하나요?',comparison:{title:'레이스 추가 뽑기권',headers:['등급','1착','2착','3착'],rows:[['GⅠ','3장','2장','1장'],['GⅡ','2장','1장','1장'],['GⅢ','1장','—','—']]},text:[
   '서포트 카드 → 가챠에서 뽑기권을 사용하세요. 턴을 마칠 때 기본 1장을 받고, 레이스 등급과 착순에 따라 추가로 받습니다.',
-  '원하는 카드가 스카우트 경매에 나오면 입찰할 수 있습니다. 합성에서는 같은 등급의 미장착 R·SR 카드 3장으로 승급에 도전하며, SSR 2장은 재합성할 수 있습니다. 주니어에 3장, 클래식에 추가 3장을 장착할 수 있습니다.'
+  '원하는 카드가 스카우트 경매에 나오면 입찰할 수 있습니다. 합성에서는 R 재료 3개로 SR 재료(75%), SR 재료 3개로 SSR 카드(60%) 획득에 도전합니다. 실패 시 재료 3개는 모두 소모되며, SSR 2장은 재합성할 수 있습니다. 주니어에 3장, 클래식에 추가 3장을 장착할 수 있습니다.'
  ]},
  {tag:'3. 인자',title:'인자는 어디서 구하나요?',facts:[['은퇴','영구 인자'],['인자 경매','1회 대여']],text:[
   '우마무스메를 은퇴시키면 영구 인자를 얻을 수 있습니다. 청·적·녹인자는 1~3성이며, 청·적 성급은 확률로 정해집니다. 청인자는 다섯 능력치 중 하나를 각각 20% 확률로 뽑고, 뽑힌 기초능력치가 높을수록 높은 성급이 나올 가능성이 커집니다. 적인자는 해당 적성이 높을수록 높은 성급이 나올 가능성이 커집니다. 녹인자 성급은 무작위입니다.',
   '스카우트의 인자 경매에서 낙찰받은 대여 인자는 계승에 한 번 쓰면 반환됩니다. 인자는 합계 20개까지 보유하며, 가득 차면 새 인자나 기존 인자 중 하나를 포기할 수 있습니다.'
  ]},
  {tag:'4. 자금',title:'돈은 어떻게 모으나요?',facts:[['레이스','착순별 상금'],['JRA','연말 수상 상금'],['팬 수익','월말 정산']],text:[
-  '레이스에 출전해 착순에 따른 상금을 받으세요. 연말 JRA 시상식에서 소속 우마무스메가 수상하면 목장에 상금이 들어옵니다.',
+  '레이스에 출전해 착순에 따른 상금을 받으세요. 연말 JRA 시상식에서 소속 우마무스메가 수상하면 학원에 상금이 들어옵니다.',
   '현역 우마무스메의 팬 수에 따라 매월 후반 종료 시 팬 수익을 받습니다. 레이스를 통해 팬을 모으고, 재정 메뉴에서 상금·팬 수익과 운영비·경매 지출을 함께 확인하세요.'
  ]}
 ];
@@ -72,7 +72,7 @@ function handbookComparison({title,headers,rows}){
  return `<table class="handbook-comparison"><caption>${title}</caption><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(([label,...cells])=>`<tr><th scope="row">${label}</th>${cells.map(cell=>`<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 function handbookHTML(inline=false){
- const sections=[['우마무스메를 육성하세요',ranchGuide],['목장을 운영하세요',managementGuide]];
+ const sections=[['우마무스메를 육성하세요',ranchGuide],['학원을 운영하세요',managementGuide]];
  return `<section class="ranch-handbook handbook-scroll ${inline?'handbook-inline':''}" ${inline?'id="welcome-handbook"':''}><header><span class="eyebrow">TRACEN FM · 운영 가이드</span></header>
  ${sections.map(([title,pages])=>`<section class="handbook-chapter"><h2>${title}</h2>${pages.map(g=>
   `<article class="handbook-topic"><h3>${g.tag.split(' ')[0]} ${g.title}</h3>${g.comparison?handbookComparison(g.comparison):`<div class="handbook-facts">${g.facts.map(([value,label])=>`<div><b>${value}</b><small>${label}</small></div>`).join('')}</div>`}<div class="handbook-copy">${g.text.map(p=>`<p>${p}</p>`).join('')}</div></article>`
@@ -208,9 +208,10 @@ function restoreDetailDialog(e){
 document.addEventListener('cancel',e=>{if(e.target===$('#modal'))restoreDetailDialog(e)},true);
 
 const ranchPageIntros={
+ home:{label:'YOUR ACADEMY',title:'오늘의 일정',icon:'◷',description:'주자를 키우고 다음 승리를 준비하세요.',metric:()=>['현재 일정',date()]},
  scout:{label:'SCOUTING',title:'스카우트',icon:'⌕',description:'우마무스메 후보를 살펴보고 서포트 카드와 인자 경매에 참여하세요.',metric:()=>['스카우트 레벨','Lv. '+S.fac.scout]},
  activities:{label:'TRAINING & RACING',title:'오늘의 활동',icon:'◷',description:'훈련·휴식·레이스 중 이번 턴에 할 활동을 선택하세요.',metric:()=>['활동 가능',E.active(S).filter(u=>E.canAct(S,u)).length+'명']},
- rivals:{label:'RIVAL WATCH',title:'라이벌',icon:'⇄',description:'내 우마무스메별 라이벌과 상대 전적을 확인하세요.',metric:()=>['목장 현역',E.active(S).length+'명']},
+ rivals:{label:'RIVAL WATCH',title:'라이벌',icon:'⇄',description:'내 우마무스메별 라이벌과 상대 전적을 확인하세요.',metric:()=>['학원 현역',E.active(S).length+'명']},
  ranking:{label:'SEASON STANDINGS',title:'시즌 랭킹',icon:'↗',description:'연차와 거리 부문을 선택해 이번 시즌의 순위를 비교하세요.',metric:()=>['시즌',E.calendarYear(S)+'년']},
  news:{label:'TRACEN NEWSROOM',title:'트레센 뉴스룸',icon:'▤',description:'레이스 결과와 라이벌 소식, 주요 타이틀을 확인하세요.',metric:()=>['현재 턴',date()]}
 };
@@ -219,8 +220,11 @@ for(const [key,intro] of Object.entries(ranchPageIntros)){
  pages[key]=()=>{
   const [label,value]=intro.metric();
   const level=S.fac.scout,slots=key==='scout'?E.marketSlots(level):null;
-  const scoutInfo=slots?`<div class="scout-banner-info"><b>스카우트 네트워크 Lv.${level}</b><div class="scout-banner-slots"><span>후보 ${slots.uma}명</span><span>서포트 ${slots.support}칸</span><span>인자 ${slots.factor}칸</span><span>서포트 SSR ${level}%</span></div>${button(level>=5?'최대 확장':'후보 칸 확장 · '+money(35000*level**2),'upgrade',`data-key="scout" ${level>=5?'disabled':''} title="확장할 때 우마무스메 후보 +2칸 · 별 등급 확률 고정"`,'small')}</div>`:'';
+  const scoutInfo=slots?`<div class="scout-banner-info"><b>스카우트 네트워크 Lv.${level}</b><div class="scout-banner-slots"><span>후보 ${slots.uma}명</span><span>서포트 ${slots.support}칸</span><span>인자 ${slots.factor}칸</span><span>SSR ${Math.round(slots.ssr*100)}% · SR 재료 25% · R 재료 ${75-Math.round(slots.ssr*100)}%</span></div>${button(level>=5?'최대 확장':'후보 칸 확장 · '+money(35000*level**2),'upgrade',`data-key="scout" ${level>=5?'disabled':''} title="확장할 때 우마무스메 후보 +2칸 · 별 등급 확률 고정"`,'small')}</div>`:'';
 
-  return `<section class="ranch-page-intro intro-${key}"><div class="ranch-intro-icon" aria-hidden="true">${intro.icon}</div><div class="ranch-intro-copy"><span class="eyebrow">${intro.label}</span><h2>${intro.title}</h2><p>${intro.description}</p>${scoutInfo}</div>${slots?'':`<div class="ranch-intro-metric"><small>${label}</small><b>${esc(value)}</b></div>`}<img class="ranch-intro-art" src="images/menu-${key}.webp" alt="" decoding="async"></section>${content()}`;
+  let body=content();
+  if(key==='home')body=body.replace(/<section class="activity-hero">[\s\S]*?<div class="today-counters">([\s\S]*?)<\/div><\/section>/, '<section class="home-turn-overview"><div class="today-counters">$1</div></section>');
+  const art=key==='home'?'activity-hero':'menu-'+key;
+  return `<section class="ranch-page-intro intro-${key}"><div class="ranch-intro-copy"><span class="eyebrow">${intro.label}</span><h2>${intro.title}</h2><p>${intro.description}</p><div class="intro-footer"><div class="ranch-intro-metric"><small>${label}</small><b>${esc(value)}</b></div>${key==='home'?button('활동 시작 →','nav','data-view="activities"','lime'):''}</div></div><img class="ranch-intro-art" src="images/${art}.webp" alt="${intro.title} 대표 이미지" decoding="async"></section>${scoutInfo?`<section class="scout-tools">${scoutInfo}</section>`:''}${body}`;
  };
 }

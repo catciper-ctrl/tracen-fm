@@ -2,12 +2,12 @@
 (function(root){'use strict';
 const Base=typeof module!=='undefined'?require('./engine.js'):root.UmaFM;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),sum=a=>a.reduce((x,y)=>x+y,0),copy=x=>JSON.parse(JSON.stringify(x));
-const NAMES=['트레센 목장','스피카 목장','리길 목장','카노푸스 목장','시리우스 목장','솔스티스 목장','아스테르 목장','루미에르 목장','에클립스 목장','오리온 목장','크레센트 목장','아르카디아 목장','벨로체 목장','노바 목장','페가수스 목장','아틀라스 목장','플뢰르 목장','세레네 목장','미라지 목장','폴라리스 목장'];
+const NAMES=['트레센 학원','스피카 학원','리길 학원','카노푸스 학원','시리우스 학원','솔스티스 학원','아스테르 학원','루미에르 학원','에클립스 학원','오리온 학원','크레센트 학원','아르카디아 학원','벨로체 학원','노바 학원','페가수스 학원','아틀라스 학원','플뢰르 학원','세레네 학원','미라지 학원','폴라리스 학원'];
 function init(db){const E=Base.init(db),oldResume=E.resume,oldNew=E.newGame,originalRaces=E.racesAt;
 const originalGradeName=E.gradeName;E.gradeName=r=>r.grade===900?'신마':originalGradeName(r);
 E.age=(S,u)=>u.status==='undebuted'?0:(u.retired?u.retiredYear:S.year)-(u.debutYear??S.year)+1;
 E.ageName=(S,u)=>u.retired?'은퇴':u.status==='undebuted'?'미데뷔':E.age(S,u)===1?'주니어':E.age(S,u)===2?'클래식':`시니어 ${E.age(S,u)-2}년차`;
-E.decline=(S,u)=>u.team===0?1-Math.min(3,Math.max(0,E.age(S,u)-3))*.05:1;
+E.decline=(S,u)=>u.mob?1:1-Math.min(3,Math.max(0,E.age(S,u)-3))*(u.team===0?.05:.03);
 E.own=S=>S.runners.filter(u=>u.team===0&&!u.retired);
 E.active=S=>E.own(S).filter(u=>u.status==='active');
 E.supportBonus=u=>{const b=[0,0,0,0,0];for(const x of u.supportCards||[]){const c=db.supports.find(c=>c.gameId===x.card);if(!c)continue;const k=Base.TYPES[c.type];if(k==null)b.forEach((v,i)=>b[i]+=({SSR:5,SR:2,R:1}[c.rarity]));else b[k]+=({SSR:15,SR:8,R:5}[c.rarity])}return b};
@@ -18,9 +18,9 @@ E.effective=E.value;E.ability=(S,u)=>sum(E.baseStats(u))/5*E.decline(S,u);
 E.makeRunner=(S,outfit,team=0,age=0,iv)=>{const o=E.outfits.get(outfit);const u={id:S.nextId++,outfit,team,status:age?'active':'undebuted',debutYear:age?S.year-age+1:null,scoutedAt:E.abs(S),iv:iv?iv.slice():Array.from({length:5},()=>E.int(S,18,30)),ev:[0,0,0,0,0],evPlan:[60,40,40,20,40],factorBonus:[0,0,0,0,0],supportCards:[],apt:o.aptitudes.map(a=>Base.APT.indexOf(a)),fitness:100,fatigue:0,injury:0,plan:'train',focus:0,sp:80,known:[],learned:[],equipped:[],inheritKnown:[],inheritLearned:[],inheritEquipped:[],innate:[],evolved:[],usedFactors:[],factorWindows:[],entry:null,history:[],wins:0,points:0,seasonPoints:0,starts:0,training:0,g1wins:0,best:99,retired:false,fans:0};u.style=E.bestStyle(u);if(age>1){const target=Math.min(200,(age-1)*55);for(let n=0;n<target;n++)u.ev[n%5]++;u.starts=(age-1)*5;u.wins=age-1;u.points=(age-1)*35;u.training=(age-1)*12;u.fans=(age-1)*1200;u.innate=o.goldSkills.slice(0,2);u.learned=u.innate.slice();u.equipped=u.learned.slice()}E.sync(u);return u};
 E.ivStars=iv=>clamp(1+Math.floor((sum(iv)/5-18)/2.5),1,5);
 E.refreshScout=S=>{const pool=E.availableOutfits(S).slice();S.scouts=[];for(let i=0;i<3+Math.floor(S.fac.scout/2)&&pool.length;i++){const o=pool.splice(E.int(S,0,pool.length-1),1)[0],iv=Array.from({length:5},()=>E.int(S,18,30));S.scouts.push({id:S.nextId++,outfit:o.gameId,iv,stars:E.ivStars(iv),cost:Math.round((22000+E.int(S,0,18000)+sum(iv)*100)*(1-S.fac.scout*.025)/500)*500,expires:E.abs(S)+4})}};
-E.newGame=(name,seed)=>{const S=oldNew(name||'트레센 목장',seed);S.rulesVersion=2;S.club=name||'트레센 목장';S.teams.forEach((t,i)=>t.name=i?NAMES[i]:S.club);S.runners=S.runners.filter(u=>u.team!==0);S.ledger=[];S.news=[];S.results=[];S.hall=[];S.raceFields={};S.pendingTurn=null;S.startup=true;const pool=E.availableOutfits(S).slice();S.starterChoices=[];for(let i=0;i<3;i++){const o=pool.splice(E.int(S,0,pool.length-1),1)[0];S.starterChoices.push(o.gameId);for(let j=pool.length-1;j>=0;j--)if(pool[j].character===o.character)pool.splice(j,1)};const cards=db.supports.filter(c=>c.rarity==='SSR').slice();S.starterSupports=[];for(let i=0;i<5;i++)S.starterSupports.push(cards.splice(E.int(S,0,cards.length-1),1)[0].gameId);E.log(S,'목장 운영의 첫 페이지','미데뷔 우마무스메 1명과 SSR 서포트 1장을 선택하세요.');return S};
-E.chooseStarter=(S,outfit,card)=>{if(!S.startup||!S.starterChoices.includes(outfit)||!S.starterSupports.includes(card))return {error:'제시된 스타팅 후보와 SSR을 선택하세요.'};const u=E.makeRunner(S,outfit,0,0,[24,24,24,24,24]);S.runners.push(u);S.supports[card]=(S.supports[card]||0)+1;E.attachSupport(S,u.id,card);S.startup=false;E.refreshScout(S);E.log(S,'새 목장 개장',`${E.o(u).characterKo} 합류 · 모든 개체값 24. 6월 신마전을 준비하세요.`,'scout');return {ok:true}};
-E.sign=(S,id)=>{const c=S.scouts.find(x=>x.id===id);if(!c||c.expires<E.abs(S))return {error:'보고서가 만료되었습니다.'};if(E.rosterCount(S)>=10)return {error:'목장 정원은 10명입니다. 전당에서 자리를 확보한 후 영입하세요.'};if(S.funds<c.cost)return {error:'스카우트 자금이 부족합니다.'};const u=E.makeRunner(S,c.outfit,0,0,c.iv);S.runners.push(u);S.scouts=S.scouts.filter(x=>x.id!==id);E.cash(S,-c.cost,'미데뷔 우마무스메 스카우트');E.log(S,`${E.o(u).characterKo} 목장 합류`,'미데뷔 · 6월 신마전 출전 전까지 노력치 훈련 제한','scout');return {ok:true,runner:u.id}};
+E.newGame=(name,seed)=>{const S=oldNew(name||'트레센 학원',seed);S.rulesVersion=2;S.club=name||'트레센 학원';S.teams.forEach((t,i)=>t.name=i?NAMES[i]:S.club);S.runners=S.runners.filter(u=>u.team!==0);S.ledger=[];S.news=[];S.results=[];S.hall=[];S.raceFields={};S.pendingTurn=null;S.startup=true;const pool=E.availableOutfits(S).slice();S.starterChoices=[];for(let i=0;i<3;i++){const o=pool.splice(E.int(S,0,pool.length-1),1)[0];S.starterChoices.push(o.gameId);for(let j=pool.length-1;j>=0;j--)if(pool[j].character===o.character)pool.splice(j,1)};const cards=db.supports.filter(c=>c.rarity==='SSR').slice();S.starterSupports=[];for(let i=0;i<5;i++)S.starterSupports.push(cards.splice(E.int(S,0,cards.length-1),1)[0].gameId);E.log(S,'학원 운영의 첫 페이지','미데뷔 우마무스메 1명과 SSR 서포트 1장을 선택하세요.');return S};
+E.chooseStarter=(S,outfit,card)=>{if(!S.startup||!S.starterChoices.includes(outfit)||!S.starterSupports.includes(card))return {error:'제시된 스타팅 후보와 SSR을 선택하세요.'};const u=E.makeRunner(S,outfit,0,0,[24,24,24,24,24]);S.runners.push(u);S.supports[card]=(S.supports[card]||0)+1;E.attachSupport(S,u.id,card);S.startup=false;E.refreshScout(S);E.log(S,'새 학원 개장',`${E.o(u).characterKo} 합류 · 모든 개체값 24. 6월 신마전을 준비하세요.`,'scout');return {ok:true}};
+E.sign=(S,id)=>{const c=S.scouts.find(x=>x.id===id);if(!c||c.expires<E.abs(S))return {error:'보고서가 만료되었습니다.'};if(E.rosterCount(S)>=10)return {error:'학원 정원은 10명입니다. 전당에서 자리를 확보한 후 영입하세요.'};if(S.funds<c.cost)return {error:'스카우트 자금이 부족합니다.'};const u=E.makeRunner(S,c.outfit,0,0,c.iv);S.runners.push(u);S.scouts=S.scouts.filter(x=>x.id!==id);E.cash(S,-c.cost,'미데뷔 우마무스메 스카우트');E.log(S,`${E.o(u).characterKo} 학원 합류`,'미데뷔 · 6월 신마전 출전 전까지 노력치 훈련 제한','scout');return {ok:true,runner:u.id}};
 E.supportWindow=(S,u)=>u.retired?null:u.status==='undebuted'?'predebut':E.age(S,u)===2?'classic':E.age(S,u)===3?'senior':null;
 E.supportSlots=(S,u)=>{const window=E.supportWindow(S,u);return {window,used:(u.supportCards||[]).filter(c=>c.window===window).length,total:(u.supportCards||[]).length}};
 E.attachSupport=(S,id,cid)=>{const u=S.runners.find(u=>u.id===id&&u.team===0&&!u.retired),c=db.supports.find(c=>c.gameId===cid);if(!u||!c||!S.supports[cid])return {error:'장착 대상과 보유 카드를 확인하세요.'};const slot=E.supportSlots(S,u);if(!slot.window||slot.used>=2||slot.total>=6)return {error:'미데뷔·클래식·시니어 1년차에 각각 2장씩만 등록할 수 있습니다.'};if(u.supportCards.some(x=>x.card===cid))return {error:'동일한 카드는 중복 장착할 수 없습니다.'};S.supports[cid]--;u.supportCards.push({card:cid,window:slot.window});for(const id of c.skills){const sk=E.skills.get(id);if(sk&&!sk.inheritedSkill&&[1,2].includes(sk.rarity))E.unlockSkill(u,id);if(E.o(u).goldSkills.includes(id)&&!u.innate.includes(id))u.innate.push(id)}E.sync(u);return {ok:true,message:'영구 장착 완료 · 능력치 보너스와 카드 스킬을 등록했습니다.'}};
@@ -63,12 +63,12 @@ for(const u of S.runners.filter(u=>!u.retired)){if(u.injury){u.injury--;u.fitnes
 const raced=new Set();for(const r of races){const registered=S.runners.filter(u=>!u.retired&&u.entry===r.key&&!raced.has(u.id)&&E.raceEligibility(S,u,r).ok);if(!registered.length)continue;let field=E.raceField(S,r).filter(u=>!raced.has(u.id));if(field.length<r.entries){const used=new Set(field.filter(u=>u.mob).map(u=>u.mobId));while(field.length<r.entries)field.push(E.mobRunner(S,r,used))}field.sort((a,b)=>E.raceRating(S,b,r)-E.raceRating(S,a,r));field.forEach((u,i)=>u.popularity=i+1);field.forEach(u=>raced.add(u.id));const result=E.simulateRace(S,r,field);E.applyResult(S,result);if(result.rows.some(x=>x.team===0))report.races.push(result.id)}
 for(const u of S.runners)u.entry=null;report.balance=S.funds-report.balance;S.pendingTurn=report;S.lastReport=report;return report};
 E.finishTurn=S=>{const report=S.pendingTurn;if(!report)return {error:'종료할 턴이 없습니다.'};const before=S.funds;if(S.turn%2===1){const revenue=E.fanMonthly(S);if(revenue)E.cash(S,revenue,'현역 팬 월 수익')}
-const upkeep=E.own(S).reduce((n,u)=>n+(u.status==='active'?1600:600),0)+Object.values(S.fac).reduce((n,l)=>n+l*l*250,0);E.cash(S,-upkeep,'목장 생활비·시설 유지비');if(S.funds<0)E.cash(S,-Math.ceil(-S.funds*.01),'차입 이자');S.missions.turns++;S.turn++;
+const upkeep=E.own(S).reduce((n,u)=>n+(u.status==='active'?1600:600),0)+Object.values(S.fac).reduce((n,l)=>n+l*l*250,0);E.cash(S,-upkeep,'학원 생활비·시설 유지비');if(S.funds<0)E.cash(S,-Math.ceil(-S.funds*.01),'차입 이자');S.missions.turns++;S.turn++;
 if(S.turn>=24){S.history.unshift({year:S.year,teams:copy(S.teams).sort((a,b)=>b.points-a.points),balance:S.funds});S.year++;S.turn=0;S.teams.forEach(t=>t.points=0);for(const u of S.runners.filter(u=>!u.retired)){u.seasonPoints=0;if(E.age(S,u)>6){E.retire(S,u,true);if(u.team===0)report.retired.push(u.id)}}}
 E.withRng(S,'ai',()=>{for(let t=1;t<S.teams.length;t++){const team=S.teams[t];if(E.team(S,t).length<4){const pool=E.availableOutfits(S);if(pool.length)S.runners.push(E.makeRunner(S,E.pick(S,pool).gameId,t,0))}}});
 if(S.turn%4===0||!S.scouts.length)E.refreshScout(S);if(!S.auctions.length)E.refreshAuctions(S);report.balance+=S.funds-before;report.needsAcknowledgement=false;S.pendingTurn=null;S.raceFields={};S.savedAt=Date.now();return {ok:true}};
 E.missionClaim=(S,key)=>{const conditions={start3:[S.missions.starts>=3,3],win1:[S.missions.wins>=1,5],turn6:[S.missions.turns>=6,4],squad4:[E.own(S).length>=4,5]},m=conditions[key];if(!m||!m[0]||S.missions.claims.includes(key))return {error:'미션 조건을 확인하세요.'};S.missions.claims.push(key);S.tickets+=m[1];return {ok:true,message:`뽑기권 ${m[1]}장 획득`}};
-E.resume=S=>{oldResume(S);if(S.rulesVersion!==2){for(const u of S.runners){const old=u.stats||[4,4,4,4,4];u.status=u.retired?'retired':u.starts?'active':'undebuted';if(u.status==='undebuted')u.debutYear=null;u.iv=[24,24,24,24,24];u.ev=old.map(v=>Math.max(0,Math.round(v/21*76)-24));if(sum(u.ev)>200){const scale=200/sum(u.ev);u.ev=u.ev.map(v=>Math.floor(v*scale))}u.evPlan=u.ev.map((v,i)=>Math.max(v,[60,40,40,20,40][i]));if(sum(u.evPlan)>200)u.evPlan=u.ev.slice();u.factorBonus=[0,0,0,0,0];u.supportCards=[];u.inheritEquipped=(u.inheritLearned||[]).slice(0,3);u.factorWindows=(u.factorWindows||[]).map(k=>k==='debut'?'junior':k);u.fans=u.retired?0:Math.min(E.fanCap,(u.wins||0)*1000+(u.starts||0)*100);E.sync(u)}for(const f of S.factors){delete f.green.stars}S.rulesVersion=2;S.raceFields={};S.pendingTurn=null;S.startup=false;S.teams.forEach((t,i)=>t.name=i?NAMES[i]:S.club);E.log(S,'목장 운영 규칙으로 전환','기존 커리어·카드·기록·자금을 보존했습니다. 등급 능력치는 새 노력치 모델로 변환했습니다. 서포트는 새로 영구 장착할 수 있습니다.','club')}S.raceFields??={};return S};
+E.resume=S=>{oldResume(S);if(S.rulesVersion!==2){for(const u of S.runners){const old=u.stats||[4,4,4,4,4];u.status=u.retired?'retired':u.starts?'active':'undebuted';if(u.status==='undebuted')u.debutYear=null;u.iv=[24,24,24,24,24];u.ev=old.map(v=>Math.max(0,Math.round(v/21*76)-24));if(sum(u.ev)>200){const scale=200/sum(u.ev);u.ev=u.ev.map(v=>Math.floor(v*scale))}u.evPlan=u.ev.map((v,i)=>Math.max(v,[60,40,40,20,40][i]));if(sum(u.evPlan)>200)u.evPlan=u.ev.slice();u.factorBonus=[0,0,0,0,0];u.supportCards=[];u.inheritEquipped=(u.inheritLearned||[]).slice(0,3);u.factorWindows=(u.factorWindows||[]).map(k=>k==='debut'?'junior':k);u.fans=u.retired?0:Math.min(E.fanCap,(u.wins||0)*1000+(u.starts||0)*100);E.sync(u)}for(const f of S.factors){delete f.green.stars}S.rulesVersion=2;S.raceFields={};S.pendingTurn=null;S.startup=false;S.teams.forEach((t,i)=>t.name=i?NAMES[i]:S.club);E.log(S,'학원 운영 규칙으로 전환','기존 커리어·카드·기록·자금을 보존했습니다. 등급 능력치는 새 노력치 모델로 변환했습니다. 서포트는 새로 영구 장착할 수 있습니다.','club')}S.raceFields??={};return S};
 for(const [domain,names] of Object.entries({scouting:['chooseStarter','refreshScout','sign'],training:['attachSupport','useSupport','train'],draws:['fuse'],races:['raceField','mobRunner','enter','simulateRace','applyResult','advance'],ai:['aiEntry'],auctions:['settleAuctions'],factors:['createFactor','applyFactor']}))for(const name of names){const fn=E[name];E[name]=(S,...args)=>E.withRng(S,domain,()=>fn(S,...args))}
 const raceEngine=typeof module!=='undefined'?require('./race.js'):root.UmaRaceEngine;raceEngine.install(E,db);
 const applyResult=E.applyResult;E.applyResult=(S,result)=>{applyResult(S,result);let traces=0;for(const stored of S.results)if(stored.trace&&++traces>4)delete stored.trace};
@@ -115,7 +115,8 @@ E.raceField=(S,r)=>{
  const player=S.runners.find(u=>u.id===r.activityRunner);
  if(player?.team!==0||!E.raceEligibility(S,player,r).ok)return [];
  const course=E.courseFor(r),used=new Set(),pools=new Map();
- const choose=(rows,index,from=0)=>rows.length?rows[from+index%(rows.length-from)]?.id:undefined;
+ const uniqueIds=new Set(db.outfits.map(o=>o.uniqueSkills.at(-1)));
+ const pick=(rows,index,count)=>Array.from({length:count},(_,offset)=>rows[(index+offset)%rows.length].id);
  const rivals=internationalNames.map((mobName,index)=>{
   const u=E.mobRunner(S,r,used);
   u.id='arc-'+E.abs(S)+'-'+index;
@@ -125,21 +126,22 @@ E.raceField=(S,r)=>{
   u.apt[6+u.style]=6;
   if(!pools.has(u.style)){
    const profile=E.courseSkillProfile(course,{style:u.style,season:r.season,time:r.time});
-   const rare=rows=>rows.filter(x=>E.skills.get(x.id)?.rarity===2);
-   const active=rare(profile.ranked).filter(x=>!x.heal&&['A','B'].includes(x.tier));
-   const backup=rare(profile.ranked).filter(x=>!x.heal&&!active.includes(x));
-   const passive=profile.passive.filter(x=>!x.conditional&&!x.conditions.some(c=>/weather|ground_condition/.test(c)));
-   const recovery=rare(profile.recovery);
-   const ranked=[...profile.recommendations.values()].sort((a,b)=>b.score-a.score);
-   const middle=rows=>rows.slice(Math.floor(rows.length*.1),Math.max(1,Math.ceil(rows.length*.35)));
-   const unique=middle(ranked.filter(x=>[3,4,5].includes(E.skills.get(x.id)?.rarity)));
-   const inherited=middle(ranked.filter(x=>E.skills.get(x.id)?.inheritedSkill));
-   pools.set(u.style,{active,backup,passive,recovery,unique,inherited});
+   const isRare=x=>E.skills.get(x.id)?.rarity===2;
+   const active=profile.ranked.filter(x=>!x.heal&&['S','A'].includes(x.tier));
+   const rare=active.filter(isRare);
+   const passive=profile.passive.filter(x=>!x.conditional&&isRare(x));
+   const recovery=profile.recovery.filter(isRare);
+   const ranked=[...profile.recommendations.values()].sort((a,b)=>b.score-a.score||a.id-b.id);
+   const uniques=ranked.filter(x=>uniqueIds.has(x.id)&&!E.skills.get(x.id)?.inheritedSkill);
+   const unique=uniques.slice(0,Math.ceil(uniques.length*.35));
+   const inherited=ranked.filter(x=>E.skills.get(x.id)?.inheritedSkill);
+   pools.set(u.style,{rare,passive,recovery,unique,inherited});
   }
-  const {active,backup,passive,recovery,unique,inherited}=pools.get(u.style);
-  const rotation=active.length?index%active.length:0;
-  u.arcSkills=[...[...active.slice(rotation),...active.slice(0,rotation),...backup].slice(0,6).map(x=>x.id),
-   choose(passive,index),choose(recovery,index),choose(unique,index),choose(inherited,index)].filter(Boolean);
+  const {rare,passive,recovery,unique,inherited}=pools.get(u.style);
+  u.debutYear=S.year-3;
+  u.arcSkills=[...pick(rare,index,6),...pick(passive,index,1),
+   ...pick(recovery.filter(x=>!pick(rare,index,6).includes(x.id)),index,1),
+   ...pick(unique,index,1),...pick(inherited,index,3)];
   return u;
  });
  return [player,...rivals].sort((a,b)=>E.raceRating(S,b,r)-E.raceRating(S,a,r)).map((u,i)=>({...u,popularity:i+1}));
@@ -183,7 +185,7 @@ E.rosterCount=S=>{
  return S.runners.filter(u=>u.team===0&&!u.released&&!hidden.has(u.id)).length;
 };
 const restoreRunner=E.restoreRetiredRunner;
-E.restoreRetiredRunner=(S,id)=>E.rosterCount(S)>=10?{error:'목장 정원이 10명입니다.'}:restoreRunner(S,id);
+E.restoreRetiredRunner=(S,id)=>E.rosterCount(S)>=10?{error:'학원 정원이 10명입니다.'}:restoreRunner(S,id);
 
 const allOwnedFactors=E.ownedFactors;
 E.ownedFactors=S=>allOwnedFactors(S).filter(f=>!(S.factorInbox||[]).includes(f.id));
@@ -256,6 +258,74 @@ E.resume=S=>{
  return S;
 };
 
+(typeof module!=='undefined'?require('./npc-skills.js'):root.UmaNPCSkills).install(E,db);
+let newsRaceContext=null;
+E.playerRaceNewsAllowed=(S,a)=>{if(a.kind!=='race'&&a.result==null)return true;const ids=[a.runner,...(a.entrantIds||[])].filter(id=>id!=null),own=ids.filter(id=>S.runners.some(u=>u.id===id&&u.team===0));if(!own.length)return true;const result=newsRaceContext||S.results.find(r=>r.id===a.result);return own.every(id=>{const row=result?.rows.find(x=>x.runner===id);if(row)return row.pos===1;const u=S.runners.find(x=>x.id===id);const h=u?.history.find(h=>h.at===(a.at??E.abs(S))&&(!a.race||h.race===a.race.name));return h?.pos===1})};
+const publishWinNews=E.publishArticle;E.publishArticle=(S,a)=>E.playerRaceNewsAllowed(S,a)?publishWinNews(S,a):null;
+const resultWinNews=E.applyResult;E.applyResult=(S,r)=>{newsRaceContext=r;try{return resultWinNews(S,r)}finally{newsRaceContext=null}};
+
+
+// Upgrade generated school labels once while preserving identities, mechanics and save keys.
+E.migrateAcademyNames=S=>{
+ if(S.academyNamingVersion===1)return S;
+ const schoolName=value=>String(value||'').replace(/(?:\s*목장)+$/u,' 학원');
+ const text=value=>value.replaceAll('목장주','학원장').replaceAll('목장','학원');
+ S.clubNameBase=E.clubNameBase(S.clubNameBase||S.club);S.club=S.clubNameBase+' 학원';
+ const seen=new WeakSet();
+ function visit(value){if(!value||typeof value!=='object'||seen.has(value))return;seen.add(value);for(const [key,item] of Object.entries(value)){
+  if(key==='trace'||key==='diagnostics')continue;
+  if(key==='teams'&&Array.isArray(item))for(const team of item)if(team?.name)team.name=schoolName(team.name).replace('베르사이유 리조트 팜 학원','베르사이유 학원').replace('선다운 랜치 학원','선다운 학원').replace('카시마 브리딩 학원','카시마 학원').replace('오가와 육성 학원','오가와 학원');
+  if(key==='farmAffiliation'&&item?.name)item.name=schoolName(item.name);
+  if(typeof item==='string'&&['title','text','reason','label','summary','description','farmName'].includes(key))value[key]=text(item);
+  else visit(item);
+ }}
+ visit(S);if(S.teams?.[0])S.teams[0].name=S.club;S.academyNamingVersion=1;return S;
+};
+const academyResume=E.resume,academyNewGame=E.newGame;
+E.resume=S=>academyResume(E.migrateAcademyNames(S));
+E.newGame=(...args)=>E.migrateAcademyNames(academyNewGame(...args));
+
+// SSR-only recruitment. Legacy cards become stackable materials exactly once.
+for(const rarity of ['R','SR'])E.supports.set(rarity,{gameId:rarity,rarity,material:true,ko:rarity+' 서포트 재료',koCharacter:rarity+' 서포트 재료',skills:[]});
+E.supportMarketCard=(S,roll=E.rnd(S))=>{const ssr=E.marketSlots(S.fac.scout).ssr;return roll<ssr?E.pick(S,db.supports):E.supports.get(roll<ssr+.25?'SR':'R')};
+E.migrateSupportMaterials=S=>{
+ S.supportMaterials??={R:0,SR:0};if(S.supportMaterialsVersion===1)return S;
+ const grade=id=>db.legacySupportGrades?.[id];
+ for(const [id,n] of Object.entries(S.supports||{}))if(grade(id)){S.supportMaterials[grade(id)]+=Math.max(0,n||0);delete S.supports[id]}
+ for(const u of S.runners||[]){let removed=0;u.supportCards=(u.supportCards||[]).filter(x=>{const r=grade(x.card);if(!r)return true;if(u.team===0){S.supportMaterials[r]++;removed++}return false});if(removed){u.supportCatchupLimit=(u.supportCards.filter(x=>x.window==='catchup').length)+6-u.supportCards.length;delete u.trainingBoard}}
+ for(const a of S.supportMarket||[])if(grade(a.card)&&a.deposit>0&&a.bidder===0&&!a.sold){E.cash(S,a.deposit,'서포트 카드 개편 · 예치금 반환');a.deposit=0}
+ S.supportMarket=(S.supportMarket||[]).filter(a=>!grade(a.card));S.auctionResults=(S.auctionResults||[]).filter(a=>!grade(a.card));S.supportMaterialsVersion=1;return S;
+};
+const materialNew=E.newGame,materialResume=E.resume;
+E.newGame=(...a)=>E.migrateSupportMaterials(materialNew(...a));
+E.resume=S=>materialResume(E.migrateSupportMaterials(S));
+E.draw=(S,n)=>{if(![1,10].includes(n))return {error:'1회 또는 10회 뽑기를 선택하세요.'};if(S.tickets<n)return {error:'뽑기권이 부족합니다.'};return E.withRng(S,'draws',()=>{S.supportMaterials??={R:0,SR:0};S.tickets-=n;const cards=[];for(let i=0;i<n;i++){const p=E.rnd(S);if(p<.08){const c=E.pick(S,db.supports);S.supports[c.gameId]=(S.supports[c.gameId]||0)+1;cards.push(c.gameId)}else{const r=p<.38?'SR':'R';S.supportMaterials[r]++;cards.push(r)}}return {ok:true,cards}})};
+const ssrFuse=E.fuse;
+E.fuse=(S,r,ids=[])=>{if(S.pendingTurn)return {error:'결산을 먼저 확인하세요.'};if(r==='SSR')return ssrFuse(S,r,ids);if(!['R','SR'].includes(r))return {error:'재료 등급을 확인하세요.'};S.supportMaterials??={R:0,SR:0};if(S.supportMaterials[r]<3)return {error:r+' 재료 3개가 필요합니다.'};return E.withRng(S,'draws',()=>{S.supportMaterials[r]-=3;const success=E.rnd(S)<(r==='SR'?.60:.75);if(success&&r==='SR'){const c=E.pick(S,db.supports);S.supports[c.gameId]=(S.supports[c.gameId]||0)+1;return {ok:true,success,card:c.gameId,message:'SSR 카드 획득!'}}if(success){S.supportMaterials.SR++;return {ok:true,success,material:'SR',message:'SR 재료 획득'}}return {ok:true,success:false,consumed:3,message:'합성 실패 · 재료 3개 전부 소모'}})};
+E.bulkFuse=(S,r)=>{if(!['R','SR'].includes(r))return {error:'R 또는 SR 재료를 선택하세요.'};const count=Math.floor((S.supportMaterials?.[r]||0)/3);if(!count)return {error:'합성 재료가 부족합니다.'};const cards=[];let successes=0;for(let i=0;i<count;i++){const result=E.fuse(S,r);if(result.error)return result;if(result.card)cards.push(result.card);successes+=Number(result.success)}return {ok:true,cards,count,successes,message:count+'회 합성 · 성공 '+successes+'회'}};
+
+// Retire remote original artwork in existing race reports and saves.
+const customArtResume=E.resume;
+E.resume=S=>{const seen=new WeakSet();function visit(v){if(!v||typeof v!=='object'||seen.has(v))return;seen.add(v);for(const [k,x] of Object.entries(v)){if(typeof x==='string'&&['image','art','mobImage','portrait'].includes(k)&&/^https?:\/\//.test(x))v[k]='images/mob-placeholder.svg';else visit(x)}}visit(S);return customArtResume(S)};
+// Material auction lots retain the same bidding, automatic bidding and refund rules.
+const settleMaterialAuctions=E.settleSupportAuctions;
+E.collectAuctionMaterials=S=>{S.supportMaterials??={R:0,SR:0};for(const r of ['R','SR'])if(S.supports[r]){S.supportMaterials[r]+=S.supports[r];delete S.supports[r]}};
+E.settleSupportAuctions=S=>{const result=settleMaterialAuctions(S);E.collectAuctionMaterials(S);return result};
+const materialAuctionResume=E.resume;
+E.resume=S=>{E.collectAuctionMaterials(S);const result=materialAuctionResume(S);if(S.materialAuctionVersion!==1){S.supportMarket=(S.supportMarket||[]).filter(a=>a.sold||a.bid||a.deposit);E.refreshSupportMarket(S,true);S.materialAuctionVersion=1}return result};
+const materialAuctionNewGame=E.newGame;E.newGame=(...args)=>{const S=materialAuctionNewGame(...args);S.materialAuctionVersion=1;return S};
+// Portrait allocation is deterministic and does not consume race randomness.
+E.assignMobPortraits=(field,key='')=>{
+ let h=2166136261;for(const ch of String(key))h=Math.imul(h^ch.charCodeAt(0),16777619)>>>0;
+ const pool=Array.from({length:20},(_,i)=>i);for(let i=pool.length-1;i>0;i--){h=(Math.imul(h,1664525)+1013904223)>>>0;const j=h%(i+1);[pool[i],pool[j]]=[pool[j],pool[i]]}
+ const mobs=field.filter(u=>u.mob).slice().sort((a,b)=>String(a.id??a.runner).localeCompare(String(b.id??b.runner)));
+ const map=new Map(mobs.map((u,i)=>[u,'images/mob-'+pool[i%20]+'.webp']));
+ return field.map(u=>{if(!u.mob)return u;const image=map.get(u);return {...u,mobImage:image,...('image' in u?{image}:{})}});
+};
+const portraitMobRunner=E.mobRunner;E.mobRunner=(S,r,used)=>{const u=portraitMobRunner(S,r,used);u.mobImage='images/mob-'+((used.size-1)%20)+'.webp';return u};
+const portraitRaceField=E.raceField;E.raceField=(S,r)=>E.assignMobPortraits(portraitRaceField(S,r),E.abs(S)+'|'+r.key);
+const portraitSimulateRace=E.simulateRace;E.simulateRace=(S,r,field,...args)=>portraitSimulateRace(S,r,E.assignMobPortraits(field,E.abs(S)+'|'+r.key),...args);
+const portraitResume=E.resume;E.resume=S=>{const result=portraitResume(S);for(const [key,field] of Object.entries(S.activityMobs||{}))S.activityMobs[key]=E.assignMobPortraits(field,key);for(const [key,field] of Object.entries(S.raceFields||{}))if(Array.isArray(field)&&field.some(u=>u.mob))S.raceFields[key]=E.assignMobPortraits(field,key);for(const r of S.results||[])r.rows=E.assignMobPortraits(r.rows,r.at+'|'+r.race.key);return result};
 return E}
 root.UmaRanch={init};if(typeof module!=='undefined')module.exports={init};
 })(typeof window!=='undefined'?window:globalThis);

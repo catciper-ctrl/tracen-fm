@@ -3,7 +3,7 @@
 const old={applyResult:E.applyResult,flushBulletins:E.flushBulletins,announceAwards:E.announceAwards,resume:E.resume,newGame:E.newGame};
 const clean=s=>String(s||'').replace(/\s*·\s*(클래식|시니어)$/,'').replace(/\s/g,''),yearOf=h=>h.year??2027+Math.floor(h.at/24),eligible=u=>u&&!u.mob&&!u.guest&&!u.released;
 const milestones=[1,3,5,10,15,20,25,30,40,50],streakMark=n=>n===3||n===5||n>=10&&n%5===0;
-const name=u=>E.o(u).characterKo,farm=(S,u)=>E.farmAffiliation(S,u)?.name||S.teams[u.team]?.name||'소속 목장';
+const name=u=>E.o(u).characterKo,farm=(S,u)=>E.farmAffiliation(S,u)?.name||S.teams[u.team]?.name||'소속 학원';
 const subject=u=>{const n=name(u),c=n.charCodeAt(n.length-1);return n+(c>=44032&&c<=55203&&(c-44032)%28?'이':'가')};
 const priority={'봄·가을 6관':6,'삼관 달성':5,'JRA 현창':5,'JRA 연도대표':4,'통산 GⅠ 다승':2,'연승 기록':1};
 const stage=(u,h)=>E.tripleRaceStage(h)||(h.age===1?'junior':h.age===2?'classic':h.age>=3?'senior':yearOf(h)-(2026+u.debutYear)+1===2?'classic':'senior');

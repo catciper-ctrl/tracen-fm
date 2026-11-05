@@ -2,6 +2,7 @@
    Pure mathematical model. FM ability1..100 maps to simulator status12..1200.
    No collision, lane avoidance, stat-dependent evasion or invented pace multipliers. */
 (function(root){'use strict';const P={frame:1/15,styleSpeed:[[1,.98,.962],[.978,.991,.975],[.938,.998,.994],[.931,1,1],[1.063,.962,.95]],styleAccel:[[1,1,.996,.996],[.985,1,.996,.996],[.975,1,1,1],[.945,1,.997,.997],[1.17,.94,.956,.956]],styleSp:[.95,.89,1,.995,.86],distanceSpeed:[.1,.2,.4,.6,.8,.9,1,1.05],distanceAccel:[.4,.5,.6,1,1,1,1,1],surfaceAccel:[.1,.3,.5,.7,.8,.9,1,1.05],styleFit:[.1,.2,.4,.6,.75,.85,1,1.1]};
+P.passiveStatBonus=v=>({40:3.5,60:5,80:6.5}[v]??v/12);
 P.base=d=>20-(d-2000)/1000;P.condition=fitness=>fitness>=90?1.04:fitness>=75?1.02:fitness>=50?1:fitness>=30?.98:.96;
 P.stats=(raw,passive,fitness,terrain,ground,styleFit,checks=[])=>{const c=P.condition(fitness),a=raw.map((v,i)=>v*12*c+(passive[i]||0));let bonus=0;for(const key of checks){const n=raw[key-1]*12*c;bonus+=(n<=300?.05:n<=600?.10:n<=900?.15:.20)/checks.length}a[0]=raw[0]*12*c*(1+bonus)+(ground===4?-50:0)+(passive[0]||0);a[2]+=(terrain===2?(ground===2?-50:-100):ground>=2?-50:0);a[4]=raw[4]*12*c*P.styleFit[styleFit]+(passive[4]||0);return a.map(v=>Math.max(1,v))};
 P.hp=(d,st,style)=>d+.8*st*P.styleSp[style];P.gutsDrain=g=>1+200/Math.sqrt(600*g);P.surfaceDrain=(terrain,ground)=>terrain===1?(ground>=3?1.02:1):(ground===3?1.01:ground===4?1.02:1);
