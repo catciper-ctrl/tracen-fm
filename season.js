@@ -13,7 +13,7 @@ const cohort=(S,u)=>u.status==='undebuted'?S.year:u.debutYear;
 E.nearbyRivals=(S,u)=>{const ranked=E.overallRanking(S),at=ranked.findIndex(x=>x.runner.id===u.id),eligible=v=>v.team>0&&v.id!==u.id&&cohort(S,v)===cohort(S,u);u.rivalIds=(u.rivalIds||[]).filter(id=>{const v=S.runners.find(x=>x.id===id);return v&&!v.retired&&eligible(v)});const candidates=ranked.map((x,i)=>({...x,rank:i+1,gap:Math.abs(i-at)})).filter(x=>eligible(x.runner)).sort((a,b)=>a.gap-b.gap||a.rank-b.rank);for(const x of candidates)if(u.rivalIds.length<6&&!u.rivalIds.includes(x.runner.id))u.rivalIds.push(x.runner.id);return u.rivalIds.map(id=>{const i=ranked.findIndex(x=>x.runner.id===id);return {...ranked[i],rank:i+1}})};
 E.rivalSchedule=(S,u)=>{E.prepareRaceDay(S);const planned=Object.entries(S.g1SeasonPlan?.days||{}).flatMap(([t,races])=>Object.entries(races).filter(([,ids])=>ids.includes(u.id)).map(([key])=>({at:(S.year-1)*24+Number(t),race:E.racesAt(S,Number(t)).find(r=>r.key===key),planned:true}))).filter(x=>x.race&&x.at>=E.abs(S));if(u.entry){const race=E.racesAt(S).find(r=>r.key===u.entry);if(race&&!planned.some(x=>x.at===E.abs(S)&&x.race.key===race.key))planned.unshift({at:E.abs(S),race,planned:false})}return planned.sort((a,b)=>a.at-b.at).slice(0,6)};
 E.projectRace=(S,u,r,at)=>{const future={...S,year:Math.floor(at/24)+1,turn:at%24},runner={...u};if(at>E.abs(S)){runner.injury=0;runner.medical=null;runner.recoveryUntil=0;runner.fitness=100;runner.entry=null;runner.activityAt=null}const q=E.raceEligibility(future,runner,r),fit=E.aptWarnings(runner,r);return {...q,ok:q.ok&&!fit.length,why:!q.ok?q.why:fit.length?'적성 C 이하: '+fit.join(', '):'출전 조건 · 적성 통과'}};
-E.raceReservations=(S,u)=>(u.reservations||[]).filter(x=>x.at>=E.abs(S)&&Math.floor(x.at/24)===S.year-1);
+E.raceReservations=(S,u)=>(u.reservations||[]).filter(x=>x.at>=E.abs(S)&&Math.floor(x.at/24)===S.year-1&&(!E.juniorQualified(u)||E.racesAt(S,x.at%24).find(r=>r.key===x.key)?.grade!==800));
 E.dueRaceReservation=(S,u)=>u?.team===0&&u.activityAt!==E.abs(S)&&E.raceReservations(S,u).find(x=>x.at===E.abs(S));
 E.reserve=(S,u,key,at)=>{
   if(S.pendingTurn||u?.team!==0||u.status!=='active'||u.retired)return {error:'현역 우마무스메만 예약할 수 있습니다.'};
@@ -21,6 +21,7 @@ E.reserve=(S,u,key,at)=>{
   if(at===E.abs(S)&&!E.canAct(S,u))return {error:'이번 턴 활동을 마쳤습니다.'};
   const race=E.racesAt(S,at%24).find(r=>r.key===key);
   if(!race)return {error:'경주가 없습니다.'};
+  if(race.grade===800&&E.juniorQualified(u))return {error:'첫 승을 거둔 우마무스메는 미승리전을 예약할 수 없습니다.'};
   if(E.age(S,u)===1&&at%24===10&&!u.starts&&race.grade!==900)return {error:'6월 전반에는 신마전만 예약할 수 있습니다.'};
   const reservations=E.raceReservations(S,u);
   if(reservations.some(x=>x.at===at))return {error:'같은 턴에는 한 경주만 예약할 수 있습니다.'};
