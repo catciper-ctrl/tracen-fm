@@ -90,7 +90,7 @@ async function loadCompatibleSave(payload,source='import'){
  // Backup the exact input before any engine migrations or persistent replacement.
  if(source!=='auto')await backup(KEY+'.import-original',payload);
  if(source==='auto'&&prepared.needsMigration){const key=KEY+'.update-original.v'+prepared.previousSchema,old=await CareerStore.read(key);if(!old)await backup(key,payload);await backup(KEY+'.update-original',old||payload);}
- let candidate;try{candidate=E.resume(prepared.state);TracenSave.mark(candidate)}catch(e){throw new Error('저장 변환에 실패했습니다: '+e.message+' · 원본은 보존됩니다.')}
+ let candidate;try{candidate=E.resume(prepared.state);TracenSave.mark(candidate);TracenPacking.compactRuntime(candidate)}catch(e){throw new Error('저장 변환에 실패했습니다: '+e.message+' · 원본은 보존됩니다.')}
  try{
   S=candidate;render(); // Validate the screen before committing the imported state.
   if(previous&&source!=='auto')await backup(BACKUP,previous);
@@ -129,7 +129,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
  if(a==='finishTurn'){if(mutate(E.finishTurn(S))){closeModal();raceTurn=null;render();if(S.ceremonyPending){ceremonyStep=0;openCeremony(S.ceremonyPending)}else showScoutArrival()}return}
  if(a==='nav'){view=d.view;raceTurn=null;search='';closeModal();render();window.scrollTo(0,0)}
  else if(a==='advance')await advance();
- else if(a==='career')showModal(`<span class="eyebrow">CAREER MANAGEMENT</span><h2 class="modal-title">나의 커리어</h2><p>${esc(S.club)} · ${date()}</p><p class="note">새 커리어를 시작하면 현재 커리어를 백업합니다. 보관하려면 저장 파일을 내보내 주세요.</p>${button('저장 파일 내보내기','export','','primary')}${button('새 커리어 준비','newCareer','','text')}${button('직전 백업 복구','restoreBackup','','text')}<p class="note">저장 형식 v${TracenSave.VERSION} · 이전 저장은 불러올 때 자동 변환합니다. 원본 백업은 일반 턴 백업과 별도로 보관합니다.</p>${button('업데이트 전 원본 내보내기','exportUpdateOriginal','','text')}${button('최근 불러온 원본 내보내기','exportImportOriginal','','text')}`);
+ else if(a==='career')showModal(`<span class="eyebrow">CAREER MANAGEMENT</span><h2 class="modal-title">나의 커리어</h2><p>${esc(S.club)} · ${date()}</p><p class="note">새 커리어를 시작하면 현재 커리어를 백업합니다. 보관하려면 저장 파일을 내보내 주세요.</p>${button('저장 파일 내보내기','export','','primary')}${button('새 커리어 준비','newCareer','','text')}${button('직전 백업 복구','restoreBackup','','text')}<p class="note">저장 형식 v${TracenSave.VERSION} · 이전 저장은 불러올 때 자동 변환합니다. 중복 데이터는 한 번만 저장하며 모든 기록은 복원됩니다. 원본 백업은 별도로 보관합니다.</p>${button('업데이트 전 원본 내보내기','exportUpdateOriginal','','text')}${button('최근 불러온 원본 내보내기','exportImportOriginal','','text')}`);
  else if(a==='newCareer'){await CareerStore.write(BACKUP,S);S=null;closeModal();render()}
  else if(a==='restoreBackup'){try{const b=await CareerStore.read(BACKUP);if(!b)throw Error('보관된 직전 백업이 없습니다.');await loadCompatibleSave(b,'restore');closeModal();render();toast('직전 백업을 복구했습니다.')}catch(e){toast('백업 복구 실패: '+e.message)}}
  else if(a==='runner')openRunner(d.id,d.tab||'profile');

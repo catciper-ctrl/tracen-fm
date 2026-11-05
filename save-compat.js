@@ -1,7 +1,8 @@
 /* Stable save envelope. Add ordered migrations when persistent data changes.
  * Keep format/storage IDs independent of the game's display name. */
 (function(root){'use strict';
-const FORMAT='tracen-fm',VERSION=2;
+const FORMAT='tracen-fm',VERSION=3;
+const Packing=typeof module!=='undefined'?require('./save-packing.js'):root.TracenPacking;
 class SaveError extends Error{constructor(message){super(message);this.name='SaveError'}}
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 function list(o,key){if(o[key]==null)o[key]=[];else if(!Array.isArray(o[key]))throw new SaveError(key+' 항목이 배열이 아닙니다. 원본 저장을 확인하세요.');return o[key]}
@@ -32,7 +33,8 @@ function legacyDefaults(S,E){
 }
 const migrations={
  1:(S,E)=>legacyDefaults(S,E),
- 2:S=>{S.saveSchemaVersion=VERSION}
+ 2:S=>{S.saveSchemaVersion=2},
+ 3:S=>{S.saveSchemaVersion=3}
 };
 function parse(input){if(typeof input!=='string')return input;try{return JSON.parse(input.replace(/^\uFEFF/,''))}catch(_){throw new SaveError('JSON 저장 파일을 읽을 수 없습니다. 압축파일이나 HTML 대신 내보낸 .json 파일을 선택하세요.')}}
 function prepare(input,E){
@@ -43,7 +45,8 @@ function prepare(input,E){
   version=payload.version??1;
   if(!Number.isInteger(version)||version<1)throw new SaveError('저장 파일의 버전 정보가 잘못되었습니다.');
   if(version>VERSION&&(!Number.isInteger(payload.minReaderVersion)||payload.minReaderVersion>VERSION))throw new SaveError('더 새로운 저장 형식입니다. 사이트를 최신 버전으로 업데이트한 뒤 불러오세요.');
-  raw=payload.state;
+  if(payload.stateEncoding!==undefined&&payload.stateEncoding!==Packing.TAG)throw new SaveError('지원하지 않는 저장 압축 구조입니다.');
+  try{raw=payload.stateEncoding?Packing.unpack(payload.state):payload.state}catch(e){throw new SaveError('저장 중복 참조를 복원하지 못했습니다: '+e.message)}
  }else{raw=payload;version=1}
  if(!object(raw)||!Array.isArray(raw.runners)||!Array.isArray(raw.teams))throw new SaveError('커리어의 우마무스메 또는 학원 목록이 없습니다.');
  if(!Number.isInteger(raw.year)||raw.year<1||!Number.isInteger(raw.turn)||raw.turn<0||raw.turn>23)throw new SaveError('커리어의 연도·턴 정보가 잘못되었습니다.');
@@ -58,9 +61,9 @@ function prepare(input,E){
  legacyDefaults(state,E);
  for(let next=from+1;next<=VERSION;next++){const migrate=migrations[next];if(!migrate)throw new SaveError('저장 변환 단계 '+next+'가 없습니다.');migrate(state,E)}
  state.saveSchemaVersion=VERSION;
- return {state,sourceVersion:version,previousSchema:from,needsMigration:from<VERSION||version<VERSION};
+ return {state,sourceVersion:version,previousSchema:from,needsMigration:from<VERSION||(payload.format!==undefined&&version<VERSION)};
 }
 function mark(state){state.saveSchemaVersion=VERSION;return state}
-function encode(state){return {format:FORMAT,version:VERSION,minReaderVersion:VERSION,game:'트레센매니저',exportedAt:new Date().toISOString(),state:structuredClone(mark(structuredClone(state)))}}
+function encode(state){const snapshot={...state,saveSchemaVersion:VERSION};return {format:FORMAT,version:VERSION,minReaderVersion:VERSION,stateEncoding:Packing.TAG,game:'트레센매니저',exportedAt:new Date().toISOString(),state:Packing.pack(snapshot)}}
 const api={FORMAT,VERSION,SaveError,prepare,mark,encode,migrations};root.TracenSave=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
