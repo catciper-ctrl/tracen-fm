@@ -1,8 +1,16 @@
-트레센매니저 업데이트
+TRACEN FM 업데이트
 
-게임 표시 이름만 변경했습니다. 기존 주소, 저장 데이터 식별자, 기능, 이미지와 밸런스는 그대로입니다.
+1. 압축을 풀고 TRACEN-FM 폴더의 내용물을 복사하세요.
+2. GitHub Desktop > Repository > Show in Explorer를 누르세요.
+3. 기존 index.html이 있는 위치에 덮어쓰세요. .git 폴더는 지우지 마세요.
+4. Summary 작성 > Commit to main > Push origin 순서로 누르세요.
+5. Pages 배포 완료 후 Ctrl+F5로 새로고침하세요.
 
-압축을 풀고 TRACEN-Manager 폴더 안의 내용물을 기존 저장소의 index.html이 있는 위치에 덮어쓰세요.
-폴더 자체나 ZIP을 올리지 마세요. .git 폴더와 기존 CNAME은 유지하세요.
-GitHub Desktop에서 Summary 작성 > Commit to main > Push origin 순서로 진행하세요.
-GitHub Pages 배포 완료 후 Ctrl+F5로 새로고침하세요. 저장소 이름이나 Pages 주소는 변경할 필요가 없습니다.
+수정 사항
+- 첫 승 이후 미승리전 예약 목록과 유효 예약에서 제외
+- 예약 목록의 필요 팬 수와 현재 팬 부족 여부 표시
+- 스킬 발동 횟수 조건 2/3 보정: 32종, 설명과 엔진 공통 적용
+- 삼관 우마무스메 이름 뒤 회색 소속 학원 표시
+- 활동 레이스별 해당 주로 및 거리 적성 배지 표시
+- 팬 수를 활동 탭 오른쪽 네모 배지로 이동
+- 경합 진단 추가. 경합 판정과 밸런스 수치 자체는 유지
