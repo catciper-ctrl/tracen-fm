@@ -18,4 +18,4 @@
 
 현재 Pages가 main / (root)에서 배포 중이면 설정 변경은 필요 없습니다.
 
-game code source commit: 5f250b37b0aab14a155ecd2657e7f1326efd0cfc
+game code source commit: 6f4e4ec6f2657d91781ed902d099445c8ab987d1

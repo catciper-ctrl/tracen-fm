@@ -595,3 +595,5 @@ details[open] > summary::after { content:" (접기)"; }
 img.avatar,img.tiny-avatar,img.tiny-portrait,img.news-portrait{border-radius:4px!important;object-fit:contain!important;object-position:center!important;background:transparent;border:0}
 /* Race map tokens alone retain the circular portrait treatment. */
 .race-token img,.tracking-token img,.live-runner-row>img{border-radius:50%;object-fit:cover;object-position:center}
+
+.ranch-welcome .welcome-title{font-size:clamp(22px,3vw,40px);line-height:1.2;letter-spacing:-.045em;word-break:keep-all;margin:14px 0 24px}.welcome-title>span{display:block;white-space:nowrap}
