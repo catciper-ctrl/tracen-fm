@@ -1,7 +1,11 @@
-트레센매니저 최신 업데이트
+트레센매니저 · 저장 호환 업데이트
 
-개선문상 출전 조건: 니엘상 1착 · 푸아상 1착 안내를 빨간색으로 추가했습니다.
+저장 형식 v2, 이전 저장 자동 변환, 원본 별도 백업 및 구체적인 오류 안내를 추가했습니다.
+구버전 파일의 소속 인원 4명 초과 오인 거부와 파생 능력치 검사 문제를 수정했습니다.
 
-압축을 풀고 TRACEN-Manager 폴더의 내용물을 기존 저장소의 index.html이 있는 위치에 덮어쓰세요.
-.git 폴더 및 기존 CNAME은 유지하세요. 저장소 이름이나 Pages 주소는 변경하지 마세요.
-GitHub Desktop에서 Commit to main > Push origin으로 업로드하세요.
+압축 안 TRACEN-Manager 폴더의 내용물을 기존 index.html 위치에 덮어쓰세요.
+.git 및 기존 CNAME을 유지하고 저장소 이름과 Pages 주소를 바꾸지 마세요.
+GitHub Desktop > Commit to main > Push origin. 배포 완료 후 새로고침하세요.
+
+커리어 관리에서 업데이트 전 원본 및 최근 불러온 원본을 내보낼 수 있습니다.
+향후 저장 구조를 변경할 때에는 save-compat.js의 VERSION 및 순차 migration과 회귀 검사를 함께 갱신해야 합니다.
