@@ -1,8 +1,7 @@
-트레센매니저 업데이트
+트레센매니저 최신 업데이트
 
-게임 표시 이름만 변경했습니다. 기존 주소, 저장 데이터 식별자, 기능, 이미지와 밸런스는 그대로입니다.
+개선문상 출전 조건: 니엘상 1착 · 푸아상 1착 안내를 빨간색으로 추가했습니다.
 
-압축을 풀고 TRACEN-Manager 폴더 안의 내용물을 기존 저장소의 index.html이 있는 위치에 덮어쓰세요.
-폴더 자체나 ZIP을 올리지 마세요. .git 폴더와 기존 CNAME은 유지하세요.
-GitHub Desktop에서 Summary 작성 > Commit to main > Push origin 순서로 진행하세요.
-GitHub Pages 배포 완료 후 Ctrl+F5로 새로고침하세요. 저장소 이름이나 Pages 주소는 변경할 필요가 없습니다.
+압축을 풀고 TRACEN-Manager 폴더의 내용물을 기존 저장소의 index.html이 있는 위치에 덮어쓰세요.
+.git 폴더 및 기존 CNAME은 유지하세요. 저장소 이름이나 Pages 주소는 변경하지 마세요.
+GitHub Desktop에서 Commit to main > Push origin으로 업로드하세요.
